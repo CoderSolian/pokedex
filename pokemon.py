@@ -52,6 +52,26 @@ def pokemon():
         else:
             if isinstance(method, str):
                 print(f"{name} can evolve into {postEvo} via {method}.")
+            else:
+                branches = pd.read_excel('Pokedex.xlsx', sheet_name='Branch Evos')
+                evIndex = branches[branches['Name'] == name].index.tolist()[0]
+                indexEnd = evIndex + method
+                level = pokedex.at[evIndex, 'Level']
+                if isinstance(level, int):
+                    print(f"At level {level}, {name} can evolve into ", end="")
+                for i in range(evIndex, indexEnd):
+                    trigger = branches.at[i, 'Methods']
+                    branch = branches.at[i, 'Evolution']
+                    print(f"{branch} via {trigger}", end="")
+                    if method > 2:
+                        if i < method - 2:
+                            print(f", ", end="")
+                        elif i < method - 1:
+                            print(f", or ", end="")
+                    else:
+                        if i < method - 1:
+                            print(f" or ", end="")
+                print(".")
     
     elif isinstance(preEvo, str):
         preIndex = int(pokedex[pokedex['Name'] == preEvo].iloc[0]['Number']) - 1

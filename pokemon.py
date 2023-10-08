@@ -29,6 +29,10 @@ def pokemon():
 
     type1 = pokedex.at[index, 'Type 1']
     type2 = pokedex.at[index, 'Type 2']
+    evolves = pokedex.at[index, 'Evolution']
+    preEvo = pokedex.at[index, 'Pre-evolution']
+    postEvo = pokedex.at[index, 'Post-evolution']
+    method = pokedex.at[index, 'Method(s)']
     
     if isinstance(type2, str):
         print(f"a dual {type1} and {type2} type.")
@@ -39,8 +43,32 @@ def pokemon():
             print(f"a {type1} type.")
     print()
 
-    evolves = pokedex.at[index, 'Evolution']
-    nextForm = ""
+    if not isinstance(evolves, int) and not isinstance(preEvo, str):
+        print(f"{name} does not evolves.")
+
+    elif isinstance(evolves, int):
+        if evolves > 0:
+            print(f"{name} evolves into {postEvo} at level {evolves}.")
+        else:
+            if isinstance(method, str):
+                print(f"{name} can evolve into {postEvo} via {method}.")
+    
+    elif isinstance(preEvo, str):
+        preIndex = int(pokedex[pokedex['Name'] == preEvo].iloc[0]['Number']) - 1
+        prePre = pokedex.at[preIndex, 'Name']
+        print(f"{preEvo} and {prePre}")
+
+    if isinstance(evolves, int):
+        print(evolves)
+    if isinstance(preEvo, str):
+        print(preEvo)
+    if isinstance(postEvo, str):
+        print(postEvo)
+    if isinstance(method, int) or isinstance(method, str):
+        print(method)
+
+
+    """nextForm = ""
     if not math.isnan(evolves):
         nextForm = pokedex.at[index + 1, 'Name']
         if evolves > 0:
@@ -50,13 +78,13 @@ def pokemon():
                 if pokedex.at[index + 1, 'Evolution'] > 0:
                     print(f"{nextForm} then evolves at level {pokedex.at[index + 1, 'Evolution']} into {secEv}.")
                 else:
-                    print(f"{nextForm} can then evolve via a {pokedex.at[index + 1, 'Method']} into {secEv}.")
+                    print(f"{nextForm} can then evolve via a {pokedex.at[index + 1, 'Method(s)']} into {secEv}.")
         else:
-            method = pokedex.at[index, 'Method']
+            method = pokedex.at[index, 'Method(s)']
             if isinstance(method, int):
                 print(f"{name} can evolve in {method} ways: ", end="")
                 for i in range(method):
-                    print(f"{pokedex.at[index + i + 1, 'Name']} with a {pokedex.at[index + i + 1, 'Method']}", end="")
+                    print(f"{pokedex.at[index + i + 1, 'Name']} with a {pokedex.at[index + i + 1, 'Method(s)']}", end="")
                     if method > 2:
                         if i < method - 2:
                             print(f", ", end="")
@@ -77,7 +105,7 @@ def pokemon():
             if pokedex.at[index - 2, 'Name'] == pokedex.at[index - 1, 'Pre-evolution']:
                 print(f"It is the final evolution of {pokedex.at[index - 2, 'Name']}.")
         
-        """preType1 = pokedex.at[index - 1, 'Type 1']
+        preType1 = pokedex.at[index - 1, 'Type 1']
         preType2 = pokedex.at[index - 1, 'Type 2']
 
         if type1 != preType1:
@@ -121,7 +149,7 @@ def pokemon():
                 print(f"{secEvo} then evolves into {thirdEvo} at level {evoMethod}.")"""
     print()
 
-    typeSearch = False
+    """typeSearch = False
     user = input(f"Do you want to do a type match up for {name}? Yes or No: ")
     if user == 'Yes':
         typeSearch = True
@@ -158,9 +186,9 @@ def pokemon():
             print(f"{name} is immune to {attack}-type moves.")
         else:
             print(f"{name} is neither weak against nor resistant to {attack}-type moves.")
-    print()
+    print()"""
     
-    return input("Do you want to look up another Pokémon? Enter Yes or No: ")
+    return #input("Do you want to look up another Pokémon? Enter Yes or No: ")
 
 def main():
     while 1:
@@ -170,4 +198,5 @@ def main():
             print("\nThank you for using my Pokédex.")
             break
 
-main()
+#main()
+pokemon()

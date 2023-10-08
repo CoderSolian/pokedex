@@ -6,6 +6,7 @@
   - Name and number
   - Type(s)
   - Any pre- and post-evolutions
+    - Will include evolution methods (level up, item, trade, etc)
 
 - Option to compare looked-up pokémon with a type and indicate whether pokémon is:
   - Doubly weak (4x),

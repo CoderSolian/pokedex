@@ -7,7 +7,6 @@ def pokemon():
     found = False
     name = ""
     number = 0
-    dexSize = 0
     print()
 
     for rowIndex, row in pokedex.iterrows():
@@ -25,7 +24,6 @@ def pokemon():
                 number = entry
                 name = pokedex.at[index, 'Name']
                 print(f"Pokémon #{number} is {name},", end=" ")
-        dexSize += 1
     if not found:
         return input("Pokémon not found. Do you want to try again? Enter Yes or No: ")
 

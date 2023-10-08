@@ -1,9 +1,56 @@
 import pandas as pd
 import math
 
+pokedex = pd.read_excel('Pokedex.xlsx')
+paths = pd.read_excel('Pokedex.xlsx', sheet_name='Branch Evos')
+
+def nextEvolve(name, index, level, method):
+    nextStage = pokedex.at[index, 'Post-evolution']
+    branched = False
+
+    if not isinstance(method, str):
+        branched = True
+    
+    if level > 0:
+        print(f"{name} evolves into {nextStage} at level {level}.")
+    else:
+        if not branched:
+            print(f"{name} can evolve into {nextStage} via {method}.")
+        else:
+            start = paths[paths['Name'] == name].index.tolist()[0]
+            print(paths.at[start, 'Method'])
+            end = start + method
+            fork = paths.at[start, 'Level']
+            if not math.isnan(fork):
+                print(f"At level {fork:.0f}, {name} evolves into ", end="")
+            else:
+                print(f"{name} can evolve into ", end="")
+            options = []
+            for i in range(start, end):
+                branch = paths.at[i, 'Evolution']
+                if isinstance(paths.at[i, 'Method'], str):
+                    trigger = f" via {paths.at[i, 'Method']}"
+                else:
+                    trigger = f" at level {paths.at[i, 'Method']}"
+                options.append(branch + trigger)
+            if method > 2:
+                branchList = ", ".join(options[:-1]) + f", or {options[-1]}."
+            else:
+                branchList = " or ".join(options) + "."
+            print(branchList)
+
+def pastEvolve(name, prevStage, level, method):
+    print(f"evolves from {prevStage} ", end="")
+    if level > 0:
+        print(f"at level {level}.")
+    else:
+        if not isinstance(method, str):
+            index = paths[paths['Evolution'] == name].index.tolist()[0]
+            method = paths.at[index, 'Method']
+        print(f"via {method}.")
+            
 def pokemon():
-    pokedex = pd.read_excel('Pokedex.xlsx')
-    entry = input("Enter a Pokédex # between 1-151 or a Pokémon name: ")
+    entry = input("Enter a Pokédex # or a Pokémon name: ")
     found = False
     name = ""
     number = 0
@@ -29,10 +76,6 @@ def pokemon():
 
     type1 = pokedex.at[index, 'Type 1']
     type2 = pokedex.at[index, 'Type 2']
-    evolves = pokedex.at[index, 'Evolution']
-    preEvo = pokedex.at[index, 'Pre-evolution']
-    postEvo = pokedex.at[index, 'Post-evolution']
-    method = pokedex.at[index, 'Method(s)']
     
     if isinstance(type2, str):
         print(f"a dual {type1} and {type2} type.")
@@ -43,130 +86,80 @@ def pokemon():
             print(f"a {type1} type.")
     print()
 
-    if not isinstance(evolves, int) and not isinstance(preEvo, str):
-        print(f"{name} does not evolves.")
+    oneStage = False
+    twoStages = False
+    threeStages = False
+    preEvo = False
+    postEvo = False
+    first = False
+    second = False
+    third = False
 
-    elif isinstance(evolves, int):
-        if evolves > 0:
-            print(f"{name} evolves into {postEvo} at level {evolves}.")
-        else:
-            if isinstance(method, str):
-                print(f"{name} can evolve into {postEvo} via {method}.")
-            else:
-                branches = pd.read_excel('Pokedex.xlsx', sheet_name='Branch Evos')
-                evIndex = branches[branches['Name'] == name].index.tolist()[0]
-                indexEnd = evIndex + method
-                level = branches.at[evIndex, 'Level']
-                if not math.isnan(level):
-                    print(f"At level {level:.0f}, {name} evolves into ", end="")  
-                else:
-                    print(f"{name} can evolve into ", end="")
-                possible_branches = []
-                for i in range(evIndex, indexEnd):
-                    trigger = branches.at[i, 'Methods']
-                    branch = branches.at[i, 'Evolution']
-                    possible_branches.append(f"{branch} via {trigger}")
-                if method > 2:
-                    branchList = ", ".join(possible_branches[:-1]) + f", or {possible_branches[-1]}."
-                else:
-                    branchList = " or ".join(possible_branches) + "."
-                print(branchList)
+    level = pokedex.at[index, 'Evolution']
+    method = pokedex.at[index, 'Means']
     
-    elif isinstance(preEvo, str):
-        preIndex = int(pokedex[pokedex['Name'] == preEvo].iloc[0]['Number']) - 1
-        prePre = pokedex.at[preIndex, 'Name']
-        print(f"{preEvo} and {prePre}")
+    if isinstance(level, int):
+        postEvo = True
 
-    if isinstance(evolves, int):
-        print(evolves)
-    if isinstance(preEvo, str):
-        print(preEvo)
-    if isinstance(postEvo, str):
-        print(postEvo)
-    if isinstance(method, int) or isinstance(method, str):
-        print(method)
+    if isinstance(pokedex.at[index, 'Pre-evolution'], str):
+        preEvo = True
+        prevStage = pokedex.at[index, 'Pre-evolution']
+        prevIndex = int(pokedex[pokedex['Name'] == prevStage].iloc[0]['Number']) - 1
+        prevLevel = pokedex.at[prevIndex, 'Evolution']
+        prevMethod = pokedex.at[prevIndex, 'Means']
+        if isinstance(pokedex.at[prevIndex, 'Pre-evolution'], str):
+            threeStages = True
+            third = True
+            firstStage = pokedex.at[prevIndex, 'Pre-evolution']
 
+    if isinstance(pokedex.at[index, 'Post-evolution'], str):
+        postEvo = True
+        nextStage = pokedex.at[index, 'Post-evolution']
+        nextIndex = int(pokedex[pokedex['Name'] == nextStage].iloc[0]['Number']) - 1
+        nextLevel = pokedex.at[nextIndex, 'Evolution']
+        nextMethod = pokedex.at[nextIndex, 'Means']
+        if isinstance(pokedex.at[nextIndex, 'Post-evolution'], str):
+            threeStages = True
+            first = True
+            finalStage = pokedex.at[nextIndex, 'Post-evolution']
 
-    """nextForm = ""
-    if not math.isnan(evolves):
-        nextForm = pokedex.at[index + 1, 'Name']
-        if evolves > 0:
-            print(f"{name} evolves at level {evolves} into {nextForm}.")
-            if nextForm == pokedex.at[index + 2, 'Pre-evolution']:
-                secEv = pokedex.at[index + 2, 'Name']
-                if pokedex.at[index + 1, 'Evolution'] > 0:
-                    print(f"{nextForm} then evolves at level {pokedex.at[index + 1, 'Evolution']} into {secEv}.")
-                else:
-                    print(f"{nextForm} can then evolve via a {pokedex.at[index + 1, 'Method(s)']} into {secEv}.")
-        else:
-            method = pokedex.at[index, 'Method(s)']
-            if isinstance(method, int):
-                print(f"{name} can evolve in {method} ways: ", end="")
-                for i in range(method):
-                    print(f"{pokedex.at[index + i + 1, 'Name']} with a {pokedex.at[index + i + 1, 'Method(s)']}", end="")
-                    if method > 2:
-                        if i < method - 2:
-                            print(f", ", end="")
-                        elif i < method - 1:
-                            print(f", or ", end="")
-                    else:
-                        if i < method - 1:
-                            print(f" or ", end="")
-                print(".")
+    if preEvo and postEvo:
+        threeStages = True
+        second = True
+    elif (preEvo and not postEvo) and not threeStages:
+        twoStages = True
+        second = True
+    elif (not preEvo and postEvo) and not threeStages:
+        twoStages = True
+        first = True
+    elif not twoStages and not threeStages:
+        oneStage = True
+
+    if (first or (second and not twoStages)) or (second and threeStages):
+        nextEvolve(name, index, level, method)
+        if first and threeStages:
+            print(f"{nextStage} then evolves into {finalStage} ", end="")
+            if nextLevel > 0:
+                print(f"at level {nextLevel}.")
             else:
-                print(f"{name} can evolve with a {method} into {nextForm}.")
-    else:
-        preEvo = pokedex.at[index, 'Pre-evolution']
-        if preEvo != pokedex.at[index - 1, 'Name']:
-            print(f"{name} does not evolve.")
+                print(f"via {nextMethod}.")
+        if second or third:
+            print("It ", end="")
+            pastEvolve(name, prevStage, prevLevel, prevMethod)
+    if third and threeStages:
+        print(f"{name} ", end="")
+        pastEvolve(name, prevStage, prevLevel, prevMethod)
+        print(f"It is the fully evolved form of {firstStage}.")
+    elif second and twoStages:
+        print(f"It is the fully evolved form of {prevStage} ", end="")
+        if prevLevel > 0:
+            print(f"(level {prevLevel}).")
         else:
-            print(f"{name} is the evolved form of {preEvo}.")
-            if pokedex.at[index - 2, 'Name'] == pokedex.at[index - 1, 'Pre-evolution']:
-                print(f"It is the final evolution of {pokedex.at[index - 2, 'Name']}.")
-        
-        preType1 = pokedex.at[index - 1, 'Type 1']
-        preType2 = pokedex.at[index - 1, 'Type 2']
+            print(f"({method}).")
 
-        if type1 != preType1:
-            print(f"{name} becomes a {type1} type upon evolution.")
+    if oneStage: print(f"{name} does not evolve.")
 
-        if type2.isalpha() and ~preType2.isalpha():
-            print(f"{name} gains its {type2} typing upon evolution.")
-
-        firstStage = pokedex.at[index - 1, 'Pre-evolution']
-        if firstStage.isalpha():
-            print(f"It is the final evolution of {firstStage}.")
-
-    if pokedex.at[index, 'Methods'] != " ":
-        options = int(pokedex.at[index, 'Methods']) + 1
-        print(f"{name} can evolve in {options - 1} ways:", end=" ")
-
-        for i in range(1, options):
-            print(f"{pokedex.at[index + i, 'Name']} via a {pokedex.at[index + i, 'Evolution']}", end="")
-            if i < options - 2:
-                print(f", ", end="")
-            elif i < options - 1:
-                print(f", or ", end="")
-        print(".")
-
-    elif name == pokedex.at[index + 1, 'Pre-evolution']:
-        index += 1
-        evoMethod = pokedex.at[index, 'Evolution']
-        secEvo = pokedex.at[index, 'Name']
-        if isinstance(evoMethod, str):
-            print(f"It can evolve into {secEvo} via a {evoMethod}.")
-        else:
-            print(f"It evolves into {secEvo} at level {evoMethod}.")
-        
-        if pokedex.at[index + 1, 'Pre-evolution'] == secEvo:
-            index += 1
-            thirdEvo = pokedex.at[index, 'Name']
-            evoMethod = pokedex.at[index, 'Evolution']
-            if isinstance(evoMethod, str):
-                print(f"{secEvo} can then evolve into {thirdEvo} via a {evoMethod}.")
-            else:
-                print(f"{secEvo} then evolves into {thirdEvo} at level {evoMethod}.")"""
-    print()
+    #######
 
     """typeSearch = False
     user = input(f"Do you want to do a type match up for {name}? Yes or No: ")

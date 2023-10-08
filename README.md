@@ -25,7 +25,7 @@
     - Check will occur for pre-evolutions
   - -1 = First evolution of that line
   - 0 = Evolves via Method
-  - Else = 
+  - Else = Evolution occurs normally at x level
 - Pre-evolution
 - Post-evolution
 - Method
